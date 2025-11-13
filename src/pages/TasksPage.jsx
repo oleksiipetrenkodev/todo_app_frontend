@@ -1,6 +1,19 @@
 import { useEffect, useState } from "react";
 import client from "../api/client";
 import TodoCard from "../components/TodoCard";
+import {
+  Container,
+  EmptyState,
+  ErrorMessage,
+  FilterCaption,
+  FilterInput,
+  FilterLabel,
+  FilterSelect,
+  FiltersSection,
+  Heading,
+  LoadingMessage,
+  TasksGrid,
+} from "./TasksPage.styles";
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState(null);
@@ -71,84 +84,46 @@ export default function TasksPage() {
     setFilters((prev) => ({ ...prev, status: event.target.value }));
   };
 
-  if (error) return <p style={{ color: "crimson" }}>{error}</p>;
-  if (!tasks) return <p>Loading...</p>;
+  if (error) return <ErrorMessage>{error}</ErrorMessage>;
+  if (!tasks) return <LoadingMessage>Loading...</LoadingMessage>;
 
   return (
-    <div style={{ maxWidth: 800, margin: "6vh auto" }}>
-      <h1>My Tasks</h1>
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: 12,
-          marginTop: 24,
-          padding: 16,
-          border: "1px solid #e2e8f0",
-          borderRadius: 12,
-          background: "#f8fafc",
-        }}
-      >
-        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ fontSize: 14, color: "#475569" }}>Title</span>
-          <input
+    <Container>
+      <Heading>My Tasks</Heading>
+      <FiltersSection>
+        <FilterLabel>
+          <FilterCaption>Title</FilterCaption>
+          <FilterInput
             type="text"
             placeholder="Search by title"
             value={filters.title}
             onChange={handleTitleFilterChange}
-            style={{
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: "1px solid #cbd5f5",
-              fontSize: 14,
-            }}
           />
-        </label>
-        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ fontSize: 14, color: "#475569" }}>Date</span>
-          <input
+        </FilterLabel>
+        <FilterLabel>
+          <FilterCaption>Date</FilterCaption>
+          <FilterInput
             type="date"
             value={filters.date}
             onChange={handleDateFilterChange}
-            style={{
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: "1px solid #cbd5f5",
-              fontSize: 14,
-            }}
           />
-        </label>
-        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ fontSize: 14, color: "#475569" }}>Status</span>
-          <select
+        </FilterLabel>
+        <FilterLabel>
+          <FilterCaption>Status</FilterCaption>
+          <FilterSelect
             value={filters.status}
             onChange={handleStatusFilterChange}
-            style={{
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: "1px solid #cbd5f5",
-              fontSize: 14,
-              background: "white",
-            }}
           >
             <option value="all">All</option>
             <option value="active">Active</option>
             <option value="done">Done</option>
-          </select>
-        </label>
-      </section>
+          </FilterSelect>
+        </FilterLabel>
+      </FiltersSection>
       {tasks.length === 0 ? (
-        <p style={{ color: "#64748b", marginTop: 16 }}>
-          No tasks yet. Create your first task!
-        </p>
+        <EmptyState>No tasks yet. Create your first task!</EmptyState>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            gap: 16,
-          }}
-        >
+        <TasksGrid>
           {tasks.map((t) => (
             <TodoCard
               key={t.id}
@@ -161,8 +136,8 @@ export default function TasksPage() {
               onEdit={(updates) => handleEditTask(t.id, updates)}
             />
           ))}
-        </div>
+        </TasksGrid>
       )}
-    </div>
+    </Container>
   );
 }

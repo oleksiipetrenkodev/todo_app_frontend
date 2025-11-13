@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { getToken, login } from "../api/auth";
+import {
+  Container,
+  Title,
+  Form,
+  Label,
+  Input,
+  SubmitButton,
+  ErrorText,
+} from "./LoginPage.styles";
 
 export default function LoginPage() {
   const nav = useNavigate();
@@ -29,42 +38,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "10vh auto" }}>
-      <h1>Sign in</h1>
-      <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <label>Email</label>
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          type="email"
-          required
-          style={{ padding: 8, borderRadius: 8, border: "1px solid #d1d5db" }}
-        />
-        <label>Password</label>
-        <input
+    <Container>
+      <Title>Sign in</Title>
+      <Form onSubmit={onSubmit}>
+        <Label>Email</Label>
+        <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+        <Label>Password</Label>
+        <Input
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           type="password"
           required
-          style={{ padding: 8, borderRadius: 8, border: "1px solid #d1d5db" }}
         />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: "10px 16px",
-            borderRadius: 8,
-            border: "none",
-            background: "#2563eb",
-            color: "white",
-            fontWeight: 600,
-            cursor: loading ? "default" : "pointer",
-          }}
-        >
+        <SubmitButton type="submit" disabled={loading}>
           {loading ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
-      {error && <p style={{ color: "crimson", marginTop: 12 }}>{error}</p>}
-    </div>
+        </SubmitButton>
+      </Form>
+      {error && <ErrorText>{error}</ErrorText>}
+    </Container>
   );
 }
