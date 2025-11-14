@@ -26,18 +26,36 @@ export default function TasksPage() {
 
   useEffect(() => {
     let mounted = true;
-    client
-      .get("/tasks")
-      .then(({ data }) => {
+
+    const fetchFiltered = async () => {
+      try {
+        const cleanFilters = Object.fromEntries(
+          Object.entries(filters).filter(([_, v]) => v !== "" && v !== "all")
+        );
+
+        const params = new URLSearchParams(cleanFilters);
+        window.history.replaceState(null, "", `?${params.toString()}`);
+
+        const { data } = await client.get("/tasks", {
+          params: {
+            title: filters.title,
+            date: filters.date,
+            status: filters.status,
+          },
+        });
+
         if (mounted) setTasks(data);
-      })
-      .catch(() => {
+      } catch (err) {
         if (mounted) setError("Failed to load tasks");
-      });
+      }
+    };
+
+    fetchFiltered();
+
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [filters]);
 
   const handleToggleCompleted = async (taskId, currentCompleted) => {
     try {
