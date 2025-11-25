@@ -87,18 +87,24 @@ export default function TasksPage() {
     }
   };
 
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await client.delete(`/delete-task/${taskId}`);
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+    } catch (err) {
+      setError("Failed to delete task");
+    }
+  };
+
   const handleTitleFilterChange = (event) => {
-    console.log("handleTitleFilterChange");
     setFilters((prev) => ({ ...prev, title: event.target.value }));
   };
 
   const handleDateFilterChange = (event) => {
-    console.log("handleDateFilterChange");
     setFilters((prev) => ({ ...prev, date: event.target.value }));
   };
 
   const handleStatusFilterChange = (event) => {
-    console.log("handleStatusFilterChange");
     setFilters((prev) => ({ ...prev, status: event.target.value }));
   };
 
@@ -142,16 +148,17 @@ export default function TasksPage() {
         <EmptyState>No tasks yet. Create your first task!</EmptyState>
       ) : (
         <TasksGrid>
-          {tasks.map((t) => (
+          {tasks.map((task) => (
             <TodoCard
-              key={t.id}
-              id={t.id}
-              title={t.title}
-              description={t.description}
-              completed={t.completed}
-              createdAt={t.createdAt}
-              onToggle={() => handleToggleCompleted(t.id, t.completed)}
-              onEdit={(updates) => handleEditTask(t.id, updates)}
+              key={task.id}
+              id={task.id}
+              title={task.title}
+              description={task.description}
+              completed={task.completed}
+              createdAt={task.createdAt}
+              onToggle={() => handleToggleCompleted(task.id, task.completed)}
+              onEdit={(updates) => handleEditTask(task.id, updates)}
+              onDelete={() => handleDeleteTask(task.id)}
             />
           ))}
         </TasksGrid>
