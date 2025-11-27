@@ -25,6 +25,7 @@ export default function TasksPage() {
   });
 
   useEffect(() => {
+    // TODO: double check this mounted
     let mounted = true;
 
     const fetchFiltered = async () => {

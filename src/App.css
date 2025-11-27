@@ -1,0 +1,52 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.app-nav {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-brand {
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 1px;
+}
+
+.app-links {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.app-link {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.app-new-task {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #10b981;
+  padding: 8px 14px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.app-main {
+  padding: 0 20px;
+}

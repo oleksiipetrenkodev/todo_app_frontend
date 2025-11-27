@@ -103,6 +103,11 @@ export const DescriptionText = styled.div`
     $completed ? "line-through" : "none"};
 `;
 
+export const IdText = styled.div`
+  font-size: 12px;
+  color: "#4b5563";
+`;
+
 export const Footer = styled.div`
   display: flex;
   flex-direction: column;
@@ -110,6 +115,7 @@ export const Footer = styled.div`
   justify-content: space-between;
   padding-top: 8px;
   border-top: 1px solid #f3f4f6;
+  gap: 5px;
 `;
 
 export const Meta = styled.div`

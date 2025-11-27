@@ -20,6 +20,7 @@ import {
   IconButton,
   EditIcon,
   ClockIcon,
+  IdText,
 } from "./TodoCard.styles";
 
 export default function TodoCard({
@@ -154,6 +155,7 @@ export default function TodoCard({
           </ClockIcon>
           <span>{formatDate(createdAt)}</span>
         </Meta>
+        <IdText>ID: {id}</IdText>
         {isEditing ? (
           <EditActions>
             <SaveButton
