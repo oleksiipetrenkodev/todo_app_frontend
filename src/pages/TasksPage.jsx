@@ -24,39 +24,111 @@ export default function TasksPage() {
     status: "all",
   });
 
+  const [previewUrls, setPreviewUrls] = useState({});
+
   useEffect(() => {
-    // TODO: double check this mounted
-    let mounted = true;
+    const controller = new AbortController();
 
     const fetchFiltered = async () => {
       try {
+        const trimmedTitle = filters.title.trim();
+
+        const effectiveFilters = {
+          ...filters,
+          title: trimmedTitle,
+        };
+
+        if (trimmedTitle && trimmedTitle.length < 3)
+          effectiveFilters.title = "";
+
         const cleanFilters = Object.fromEntries(
-          Object.entries(filters).filter(([_, v]) => v !== "" && v !== "all")
+          Object.entries(effectiveFilters).filter(
+            ([_, v]) => v !== "" && v !== "all"
+          )
         );
 
         const params = new URLSearchParams(cleanFilters);
         window.history.replaceState(null, "", `?${params.toString()}`);
 
         const { data } = await client.get("/tasks", {
-          params: {
-            title: filters.title,
-            date: filters.date,
-            status: filters.status,
-          },
+          params: effectiveFilters,
+          signal: controller.signal,
         });
 
-        if (mounted) setTasks(data);
+        setTasks(data);
       } catch (err) {
-        if (mounted) setError("Failed to load tasks");
+        const canceled =
+          err?.code === "ERR_CANCELED" || err?.name === "AbortError";
+        if (!canceled) setError("Failed to load tasks");
       }
     };
 
     fetchFiltered();
-
-    return () => {
-      mounted = false;
-    };
+    return () => controller.abort();
   }, [filters]);
+
+  const uploadAttachment = async (taskId, file) => {
+    try {
+      const { data: presign } = await client.post(
+        `/tasks/${taskId}/attachments/presign`,
+        { filename: file.name, contentType: file.type }
+      );
+
+      const fileUpload = await fetch(presign.uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      if (!fileUpload.ok) {
+        throw new Error(`S3 PUT failed: ${fileUpload.status}`);
+      }
+
+      const { data: updatedTask } = await client.post(
+        `/tasks/${taskId}/attachments`,
+        {
+          key: presign.key,
+          name: file.name,
+          size: file.size,
+          contentType: file.type,
+        }
+      );
+
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
+    } catch (err) {
+      console.error(err);
+      setError("Failed to upload file");
+    }
+  };
+
+  const deleteAttachment = async (taskId, key) => {
+    try {
+      const { data: updatedTask } = await client.delete(
+        `/tasks/${taskId}/attachments`,
+        { params: { key } }
+      );
+
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
+    } catch (err) {
+      setError("Failed to delete image");
+    }
+  };
+
+  const getPreviewUrl = async (taskId, key) => {
+    const cacheKey = `${taskId}:${key}`;
+    if (previewUrls[cacheKey]) return previewUrls[cacheKey];
+
+    const { data } = await client.get(
+      `/tasks/${taskId}/attachments/presign-get`,
+      {
+        params: { key },
+      }
+    );
+
+    setPreviewUrls((prev) => ({ ...prev, [cacheKey]: data.url }));
+
+    return data.url;
+  };
 
   const handleToggleCompleted = async (taskId, currentCompleted) => {
     try {
@@ -160,6 +232,10 @@ export default function TasksPage() {
               onToggle={() => handleToggleCompleted(task.id, task.completed)}
               onEdit={(updates) => handleEditTask(task.id, updates)}
               onDelete={() => handleDeleteTask(task.id)}
+              onUpload={(file) => uploadAttachment(task.id, file)}
+              getPreviewUrl={(key) => getPreviewUrl(task.id, key)}
+              attachments={task.attachments}
+              onDeleteAttachment={(key) => deleteAttachment(task.id, key)}
             />
           ))}
         </TasksGrid>

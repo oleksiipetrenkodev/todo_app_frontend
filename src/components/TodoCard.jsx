@@ -32,11 +32,46 @@ export default function TodoCard({
   onToggle,
   onEdit,
   onDelete,
+  onUpload,
+  attachments,
+  getPreviewUrl,
+  onDeleteAttachment,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [editDescription, setEditDescription] = useState(description);
   const [isSaving, setIsSaving] = useState(false);
+  const [thumbUrls, setThumbUrls] = useState({});
+
+  useEffect(() => {
+    const list = attachments || [];
+    if (list.length === 0) {
+      setThumbUrls({});
+      return;
+    }
+
+    const keys = new Set(list.map((a) => a.key));
+    setThumbUrls((prev) => {
+      const next = {};
+      for (const k of Object.keys(prev)) {
+        if (keys.has(k)) next[k] = prev[k];
+      }
+      return next;
+    });
+
+    (async () => {
+      const missing = list.filter((a) => !thumbUrls[a.key]);
+      for (const a of missing) {
+        try {
+          const url = await getPreviewUrl(a.key);
+
+          setThumbUrls((prev) => ({ ...prev, [a.key]: url }));
+        } catch {
+          console.log(e);
+        }
+      }
+    })();
+  }, [attachments, getPreviewUrl]);
 
   useEffect(() => {
     if (!isEditing) {
@@ -75,7 +110,7 @@ export default function TodoCard({
   };
 
   const handleDelete = async () => {
-    await onDelete(id);
+    await onDelete();
   };
 
   const handleCancel = () => {
@@ -134,6 +169,56 @@ export default function TodoCard({
                   {description}
                 </DescriptionText>
               )}
+
+              {attachments?.length ? (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {attachments.map((a) => {
+                    const url = thumbUrls[a.key];
+                    return (
+                      <div key={a.key} style={{ position: "relative" }}>
+                        {url ? (
+                          <img
+                            src={url}
+                            alt=""
+                            width={80}
+                            height={80}
+                            style={{ objectFit: "cover", borderRadius: 8 }}
+                          />
+                        ) : (
+                          <div
+                            style={{ width: 80, height: 80, borderRadius: 8 }}
+                          />
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => onDeleteAttachment?.(a.key)}
+                          style={{
+                            position: "absolute",
+                            top: 4,
+                            right: 4,
+                            borderRadius: 6,
+                            padding: "2px 6px",
+                          }}
+                          title="Delete image"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onUpload?.(file);
+                  e.target.value = "";
+                }}
+              />
             </>
           )}
         </Content>
