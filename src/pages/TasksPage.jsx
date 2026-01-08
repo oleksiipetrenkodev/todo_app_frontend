@@ -69,35 +69,23 @@ export default function TasksPage() {
 
   const uploadAttachment = async (taskId, file) => {
     try {
-      const { data: presign } = await client.post(
-        `/tasks/${taskId}/attachments/presign`,
-        { filename: file.name, contentType: file.type }
-      );
-
-      const fileUpload = await fetch(presign.uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-
-      if (!fileUpload.ok) {
-        throw new Error(`S3 PUT failed: ${fileUpload.status}`);
-      }
+      const form = new FormData();
+      form.append("file", file);
 
       const { data: updatedTask } = await client.post(
         `/tasks/${taskId}/attachments`,
+        form,
         {
-          key: presign.key,
-          name: file.name,
-          size: file.size,
-          contentType: file.type,
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
       setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
     } catch (err) {
-      console.error(err);
-      setError("Failed to upload file");
+      const status = err?.response?.status;
+      if (status === 413) setError("File is too large");
+      else if (status === 400) setError("Unsupported file type");
+      else setError("Failed to upload file");
     }
   };
 
