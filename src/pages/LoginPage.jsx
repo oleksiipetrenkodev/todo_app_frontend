@@ -15,7 +15,7 @@ export default function LoginPage() {
   const nav = useNavigate();
   const token = getToken();
   const [email, setEmail] = useState("oleksii@example.com");
-  const [password, setPassword] = useState("oleksii");
+  const [password, setPassword] = useState("oleksii123-smthnew123@@");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -42,7 +42,12 @@ export default function LoginPage() {
       <Title>Sign in</Title>
       <Form onSubmit={onSubmit}>
         <Label>Email</Label>
-        <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+        <Input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          required
+        />
         <Label>Password</Label>
         <Input
           value={password}
