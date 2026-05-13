@@ -19,3 +19,11 @@ export async function login(email, password) {
   }
   return data;
 }
+
+export async function register(email, password) {
+  const { data } = await client.post("/register", { email, password });
+  if (data?.token) {
+    setToken(data.token);
+  }
+  return data;
+}

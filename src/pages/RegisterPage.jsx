@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { getToken, login } from "../api/auth";
+import { getToken, register } from "../api/auth";
 import {
   Container,
   Title,
@@ -11,7 +11,7 @@ import {
   ErrorText,
 } from "./LoginPage.styles";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const nav = useNavigate();
   const token = getToken();
   const [email, setEmail] = useState("");
@@ -24,10 +24,10 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await login(email, password);
+      await register(email, password);
       nav("/tasks", { replace: true });
     } catch {
-      setError("Invalid credentials");
+      setError("Registration failed");
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ export default function LoginPage() {
 
   return (
     <Container>
-      <Title>Sign in</Title>
+      <Title>Create account</Title>
       <Form onSubmit={onSubmit}>
         <Label>Email</Label>
         <Input
@@ -54,9 +54,10 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           type="password"
           required
+          minLength={6}
         />
         <SubmitButton type="submit" disabled={loading}>
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? "Creating..." : "Create account"}
         </SubmitButton>
       </Form>
       {error && <ErrorText>{error}</ErrorText>}
