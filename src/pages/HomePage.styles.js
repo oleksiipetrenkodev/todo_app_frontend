@@ -25,6 +25,10 @@ export const Title = styled.h1`
   margin: 8px 0;
 `;
 
+export const SmallTitle = styled.h2`
+  font-size: 24px;
+  margin: 8px 0;
+`;
 export const Description = styled.p`
   color: #475569;
   max-width: 420px;
@@ -44,6 +48,7 @@ export const Button = styled.button`
   font-weight: 600;
   min-width: 120px;
   cursor: pointer;
-  background-color: ${({ variant }) => (variant === "primary" ? "#2563eb" : "#f1f5f9")};
+  background-color: ${({ variant }) =>
+    variant === "primary" ? "#2563eb" : "#f1f5f9"};
   color: ${({ variant }) => (variant === "primary" ? "white" : "#0f172a")};
 `;

@@ -1,17 +1,41 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearToken, getToken } from "../api/auth";
-import { Actions, Button, Description, Hero, Lead, Page, Title } from "./HomePage.styles";
+import {
+  Actions,
+  Button,
+  Hero,
+  Lead,
+  Page,
+  Title,
+  SmallTitle,
+} from "./HomePage.styles";
+
+function getEmailFromToken(token) {
+  if (!token) {
+    return "";
+  }
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.email || "";
+  } catch {
+    return "";
+  }
+}
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
-    Boolean(getToken())
+    Boolean(getToken()),
   );
+  const [email, setEmail] = useState(() => getEmailFromToken(getToken()));
 
   useEffect(() => {
     const handleStorage = () => {
-      setIsAuthenticated(Boolean(getToken()));
+      const token = getToken();
+      setIsAuthenticated(Boolean(token));
+      setEmail(getEmailFromToken(token));
     };
     window.addEventListener("storage", handleStorage);
     return () => {
@@ -23,9 +47,14 @@ export default function HomePage() {
     navigate("/login");
   };
 
+  const handleRegister = () => {
+    navigate("/register");
+  };
+
   const handleLogout = () => {
     clearToken();
     setIsAuthenticated(false);
+    setEmail("");
   };
 
   return (
@@ -33,16 +62,19 @@ export default function HomePage() {
       <Hero>
         <Lead>Welcome to</Lead>
         <Title>Your Todo Workspace</Title>
-        <Description>
-          Jump in to manage your tasks. Sign in to access private routes, or sign out when you are done.
-        </Description>
+        {email && <SmallTitle>{email}</SmallTitle>}
       </Hero>
 
       <Actions>
         {!isAuthenticated && (
-          <Button type="button" onClick={handleLogin} variant="primary">
-            Login
-          </Button>
+          <>
+            <Button type="button" onClick={handleLogin} variant="secondary">
+              Login
+            </Button>
+            <Button type="button" onClick={handleRegister} variant="primary">
+              Register
+            </Button>
+          </>
         )}
         {isAuthenticated && (
           <Button type="button" onClick={handleLogout} variant="secondary">
