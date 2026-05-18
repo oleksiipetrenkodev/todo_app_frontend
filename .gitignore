@@ -8,4 +8,5 @@ pnpm-lock.yaml
 yarn.lock
 package-lock.json
 *.local
-.env
+.env.development
+.env.production
